@@ -1,34 +1,23 @@
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Image, Text, ScrollView, ImageBackground, StatusBar } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, Image, Text, ScrollView, StatusBar, RefreshControl, Pressable } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const API_KEY = 'eccebeba529b4197b40153829250503';
 const CITY = "Akure";
-const URL = `http://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${CITY}&days=1`;
+//const URL = `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${CITY}`;
+const URL = `http://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${CITY}&days=2`;
 
-export default function Home() {
+export default function Home({ navigation }) {
     const [weather, setWeather] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
-
-    const weatherImages = {
-        "Sunny": require("../assets/cloudy.png"),
-        "Partly Cloudy": require("../assets/cloudy.png"),
-        "Cloudy": require("../assets/cloudy.png"),
-        "Rain": require("../assets/rainy.png"),
-        "Thunderstorm": require("../assets/rain.png"),
-        "Patchy rain nearby": require("../assets/rain.png"),
-        "Snow": require("../assets/snowy.png"),
-        "Mist": require("../assets/snowy.png"),
-        "Fog": require("../assets/snowy.png"),
-    };
+    const [isRefresh, setIsRefresh] = useState(false)
 
     const specificHours = [10, 12, 13, 15, 17, 22];
-
-    const selectedWeather = weather.forecast.forecastday[0].hour.filter(hour => {
+    const selectedWeather = weather?.forecast?.forecastday?.[0]?.hour?.filter(hour => {
         const hourValue = new Date(hour.time).getHours();
         return specificHours.includes(hourValue);
-    });
-    console.log(selectedWeather);
+    }) || []; 
 
     const formatDateTime = (localtime) => {
         const date = new Date(localtime);
@@ -59,91 +48,116 @@ export default function Home() {
         fetchWeather()
     }, [])
 
-    return (
-        <ImageBackground
-            source={require('../assets/background.png')} resizeMode='cover'
-            style={{flex: 1}}
+    const handleRefresh = () => {
+        setIsRefresh(true)
+        fetchWeather()
+        setIsRefresh(false)
+    }
+
+    return (       
+        <LinearGradient
+            colors={['#352163', '#331972', '#33143C']}
+            locations={[0, 0.58, 1]}
+            style={styles.container}
         >
             <StatusBar />
-            <LinearGradient
-                colors={['#352163', '#331972', '#33143C']}
-                locations={[0, 0.58, 1]}
-                style={styles.container}
-            >
-                {
-                    isLoading 
-                    ? <ActivityIndicator size='large' color='#fff' />
-                    :   <ScrollView>
+            {
+                isLoading 
+                ? <ActivityIndicator size='large' color='#fff' />
+                :   
+                <ScrollView showsVerticalScrollIndicator={false} 
+                    refreshControl={
+                        <RefreshControl refreshing={isRefresh} onRefresh={handleRefresh} />
+                    }
+                >
+                    <View style={styles.informationContainer}>
 
-                            <View style={styles.informationContainer}>
+                        <View style={styles.information}>
+                            <Text style={styles.weatherText}>{weather?.current.condition.text}</Text>
 
-                                <View style={styles.information}>
-                                    <Text style={styles.weatherText}>{weather.current.condition.text}</Text>
+                            <Image source={{ uri: `https:${weather.current.condition.icon}` }} style={{width: 150, height: 150}} resizeMode='cover' />
 
-                                    <Image source={weatherImages[weather.current.condition.text]} style={{width: 172, height: 179}} resizeMode='contain' />
+                            <Text style={styles.tempText}>{weather.current.temp_c + '\u00B0'}</Text>
 
-                                    <Text style={styles.tempText}>{weather.current.temp_c + '\u00B0'}</Text>
+                            <Text style={styles.weatherTime}>{formatDateTime(weather.location.localtime)}</Text>
+                        </View>
 
-                                    <Text style={styles.weatherTime}>{formatDateTime(weather.location.localtime)}</Text>
-                                </View>
-
-                                <LinearGradient
-                                    colors={['#957DCD', '#523D7F']}
-                                    locations={[0, 1]}
-                                    style={styles.weatherInformation}
-                                >
-                                    <View style={styles.weatherQuality}>
-                                        <Image source={require('../assets/precipitation.png')} resizeMode='cover' style={{width: 24, height: 24}} />
-                                        <Text style={styles.qualityValue}>{weather.current.precip_mm}%</Text>
-                                        <Text style={styles.qualityName}>Precipitation</Text>
-                                    </View>
-
-                                    <View style={styles.weatherQuality}>
-                                        <Image source={require('../assets/humidity.png')} resizeMode='cover' style={{width: 24, height: 24}} />
-                                        <Text style={styles.qualityValue}>{weather.current.humidity}%</Text>
-                                        <Text style={styles.qualityName}>Humidity</Text>
-                                    </View>
-                                    
-                                    <View style={styles.weatherQuality}>
-                                        <Image source={require('../assets/speed.png')} resizeMode='cover' style={{width: 24, height: 24}} />
-                                        <Text style={styles.qualityValue}>{weather.current.wind_kph}Km/h</Text>
-                                        <Text style={styles.qualityName}>Wind Speed</Text>
-                                    </View>
-                                </LinearGradient>
+                        <LinearGradient
+                            colors={['#957DCD', '#523D7F']}
+                            locations={[0, 1]}
+                            style={styles.weatherInformation}
+                        >
+                            <View style={styles.weatherQuality}>
+                                <Image source={require('../assets/precipitation.png')} resizeMode='cover' style={{width: 24, height: 24}} />
+                                <Text style={styles.qualityValue}>{weather.current.precip_mm}%</Text>
+                                <Text style={styles.qualityName}>Precipitation</Text>
                             </View>
 
-                            <View style={{marginTop: 30, gap: 15}}>
-                                <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>Today</Text>
-                                    <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>7-Day Forecasts</Text>
-                                </View>
+                            <View style={styles.weatherQuality}>
+                                <Image source={require('../assets/humidity.png')} resizeMode='cover' style={{width: 24, height: 24}} />
+                                <Text style={styles.qualityValue}>{weather.current.humidity}%</Text>
+                                <Text style={styles.qualityName}>Humidity</Text>
+                            </View>
+                            
+                            <View style={styles.weatherQuality}>
+                                <Image source={require('../assets/speed.png')} resizeMode='cover' style={{width: 24, height: 24}} />
+                                <Text style={styles.qualityValue}>{weather.current?.wind_kph}Km/h</Text>
+                                <Text style={styles.qualityName}>Wind Speed</Text>
+                            </View>
+                        </LinearGradient>
+                    </View>
 
+                    <View style={{marginTop: 30, gap: 15}}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>Today</Text>
+                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>7-Day Forecasts</Text>
+                        </View>
 
-                                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                                    <View style={{flexDirection: 'row', gap: 10}}>
-                                        {selectedWeather.map((hour, index) => (
-                                            <LinearGradient
-                                                colors={['#957DCD', '#523D7F']}
-                                                locations={[0, 1]}
-                                                key={index}
-                                                style={{borderRadius: 8, paddingHorizontal: 7, paddingVertical: 10, alignItems: 'center', gap: 3}}
-                                            >
-                                                <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{new Date(hour.time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</Text>
-                                                <Image source={{ uri: `https:${hour.condition.icon}` }} style={{ width: 37, height: 30 }} />
-                                                <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.temp_c +  '\u00B0'}</Text>
-                                            </LinearGradient>
-                                        ))}
-                                    </View>
-
-                                </ScrollView>
+                        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                            <View style={{flexDirection: 'row', gap: 10}}>
+                                {selectedWeather.map((hour, index) => (
+                                    <LinearGradient
+                                        colors={['#957DCD', '#523D7F']}
+                                        locations={[0, 1]}
+                                        key={index}
+                                        style={{borderRadius: 8, paddingHorizontal: 7, paddingVertical: 10, alignItems: 'center', gap: 3}}
+                                    >
+                                        <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{new Date(hour.time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</Text>
+                                        <Image source={{ uri: `https:${hour.condition.icon}` }} style={{ width: 37, height: 30 }} />
+                                        <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.temp_c +  '\u00B0'}</Text>
+                                    </LinearGradient>
+                                ))}
                             </View>
                         </ScrollView>
-                }
-                
-            
+                    </View>
 
-            </LinearGradient>
-        </ImageBackground>
+                    
+                </ScrollView>
+            }
+
+            <View style={styles.footerView}>
+
+                <LinearGradient
+                    colors={['#957DCD', '#523D7F']}
+                    locations={[0, 1]}
+                    style={styles.footerLinearContainer}
+                >
+                    <Ionicons name='home' size={24} color='#fff' />
+                </LinearGradient>
+               
+                <Pressable onPress={() => navigation.navigate('Search')}>
+                    <Ionicons name='search' size={24} color='#fff' />
+                </Pressable>
+                
+                <View>
+                    <Ionicons name='person-outline' size={24} color='#fff' />
+                </View>
+                <View>
+                    <Ionicons name='notifications' size={24} color='#fff' />
+                </View>
+            </View>
+        </LinearGradient>
+       
     )
 }
 
@@ -157,7 +171,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 20,
-        marginTop: 106
+        marginTop: StatusBar.currentHeight
     },
     information: {
         justifyContent: 'center',
@@ -178,8 +192,7 @@ const styles = StyleSheet.create({
         color: '#DEDDDD'
     },
     weatherInformation: {
-        borderRadius: 8,
-        borderWidth: 1,
+        borderRadius: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -200,5 +213,23 @@ const styles = StyleSheet.create({
     weatherQuality: {
         alignItems: 'center',
         gap: 3
+    },
+    footerView: {
+        flexDirection: 'row',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 50
+    },
+    footerLinearContainer: {
+        width: 50,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
     }
 })

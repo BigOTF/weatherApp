@@ -1,19 +1,19 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { View, Text, StyleSheet } from "react-native";
 
 import Home from "./screen/Home";
-import Search from "./screen/Search";
+import SearchScreen from "./screen/SearchScreen";
 import Profile from "./screen/Profile";
 import Notifcation from "./screen/Notifcation";
 
-const Tab = createBottomTabNavigator()
+const Stack = createNativeStackNavigator()
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator
+      <Stack.Navigator
         screenOptions={{
           headerTransparent: true,
           headerTintColor: '#fff',
@@ -24,58 +24,29 @@ export default function App() {
         }}
       >
 
-        <Tab.Screen 
+        <Stack.Screen
           name="Home"
           component={Home}
           options={{
-            tabBarIcon: ({ color }) => <Ionicons name='home' size={24} color={color} />,
-            tabBarActiveTintColor: '#fff',
-            headerTitle: () => (
-              <View style={styles.headerTitle}>
-
-                <View style={styles.iconContainer}>
-                  <Ionicons name="grid" size={16} color='#fff' />
-                </View>
-                
-                <Text style={styles.headerText}>Home</Text>
-
-                <View style={styles.iconContainer}>
-                  <Ionicons name="refresh" size={23} color='#fff' style={{ transform: [{ rotate: '45deg' }] }} />
-                </View>
-
-              </View>
-            ),
-            
+            headerShown: false
           }}
         />
 
-        <Tab.Screen 
-          name="Profile"
-          component={Profile}
-          options={{
-            tabBarIcon: ({ color }) => <Ionicons name='search' size={24} color={color} />,
-            tabBarActiveTintColor: '#fff'
-          }}
-        />
-        <Tab.Screen 
+        <Stack.Screen
           name="Search"
-          component={Search}
+          component={SearchScreen}
           options={{
-            tabBarIcon: ({ color }) => <Ionicons name='person-outline' size={24} color={color} />,
-            tabBarActiveTintColor: '#fff'
-          }}
-        />
-        <Tab.Screen 
-          name="Notification"
-          component={Notifcation}
-          options={{
-            tabBarIcon: ({ color }) => <Ionicons name='notifications' size={24} color={color} />,
-            tabBarActiveTintColor: '#fff'
+            headerTitleStyle: {
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 600,
+            },
+            headerTitleAlign: 'center',
+            headerTitle: 'Search for City'
           }}
         />
 
-
-      </Tab.Navigator>
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
