@@ -13,7 +13,7 @@ export default function Home({ navigation }) {
     const [isLoading, setIsLoading] = useState(true)
     const [isRefresh, setIsRefresh] = useState(false)
 
-    const specificHours = [10, 12, 13, 15, 17, 22];
+    const specificHours = [10, 12, 14, 16, 18, 20, 22, 0];
     const selectedWeather = weather?.forecast?.forecastday?.[0]?.hour?.filter(hour => {
         const hourValue = new Date(hour.time).getHours();
         return specificHours.includes(hourValue);
@@ -73,9 +73,9 @@ export default function Home({ navigation }) {
                     <View style={styles.informationContainer}>
 
                         <View style={styles.information}>
-                            <Text style={styles.weatherText}>{weather?.current.condition.text}</Text>
+                            <Text style={styles.weatherText}>{weather.current.condition.text}</Text>
 
-                            <Image source={{ uri: `https:${weather.current.condition.icon}` }} style={{width: 150, height: 150}} resizeMode='cover' />
+                            <Image source={{ uri: `https:${weather.current.condition.icon}` }} style={{width: 170, height: 170, marginTop: 30}} resizeMode='cover' />
 
                             <Text style={styles.tempText}>{weather.current.temp_c + '\u00B0'}</Text>
 
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     },
     information: {
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     weatherText: {
         fontSize: 12,
