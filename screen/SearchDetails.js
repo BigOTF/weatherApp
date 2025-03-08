@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
     },
     weatherQuality: {
         alignItems: 'center',
-        gap: 3
+        gap: 8,
     },
 })

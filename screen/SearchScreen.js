@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, StyleSheet, TextInput, Pressable, Image, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Pressable, Image, StatusBar, FlatList } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
@@ -105,9 +105,9 @@ export default function SearchScreen({navigation}) {
 
             <View style={styles.footerView}>
            
-                <View style={styles.footerLinearContainer}>
+                <Pressable onPress={() => navigation.navigate("Home")} style={styles.footerLinearContainer}>
                     <Ionicons name='home' size={24} color='#fff' />
-                </View>
+                </Pressable>
 
                 <LinearGradient
                     colors={['#957DCD', '#523D7F']}
@@ -116,13 +116,7 @@ export default function SearchScreen({navigation}) {
                 >
                     <Ionicons name='search' size={24} color='#fff' />
                 </LinearGradient>
-                
-                <View>
-                    <Ionicons name='person-outline' size={24} color='#fff' />
-                </View>
-                <View>
-                    <Ionicons name='notifications' size={24} color='#fff' />
-                </View>
+    
             </View>
 
         </LinearGradient>

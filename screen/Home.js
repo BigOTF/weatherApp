@@ -74,7 +74,6 @@ export default function Home({ navigation }) {
             locations={[0, 0.58, 1]}
             style={styles.container}
         >
-            <StatusBar />
             {
                 isLoading 
                 ? <ActivityIndicator size='large' color='#fff' />
@@ -148,7 +147,7 @@ export default function Home({ navigation }) {
                                         >
                                             <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{new Date(hour.time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</Text>
                                             <Image source={{ uri: `https:${hour.condition.icon}` }} style={{ width: 37, height: 30 }} />
-                                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.condition.text}</Text>
+                                            {/* <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.condition.text}</Text> */}
                                             <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.temp_c +  '\u00B0'}</Text>
                                         </LinearGradient>
                                     ))}
@@ -171,7 +170,7 @@ export default function Home({ navigation }) {
                                                         {new Date(day.date).toLocaleDateString("en-US", { weekday: "long" })}
                                                     </Text>
                                                     <Image source={{ uri: `https:${day.day.condition.icon}` }} style={{ width: 30, height: 30 }} />
-                                                    <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{day.day.condition.text}</Text>
+                                                    {/* <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{day.day.condition.text}</Text> */}
                                                     <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{day.day.avgtemp_c +  '\u00B0'}</Text>
                                                 </LinearGradient>
                                             ))}
@@ -200,13 +199,7 @@ export default function Home({ navigation }) {
                 <Pressable onPress={() => navigation.navigate('Search')}>
                     <Ionicons name='search' size={24} color='#fff' />
                 </Pressable>
-                
-                <View>
-                    <Ionicons name='person-outline' size={24} color='#fff' />
-                </View>
-                <View>
-                    <Ionicons name='notifications' size={24} color='#fff' />
-                </View>
+        
             </View>
         </LinearGradient>
        
@@ -217,21 +210,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         fontFamily: 'Poppins',
-        paddingHorizontal: 15
+        paddingHorizontal: 15,
+        paddingTop: StatusBar.currentHeight
     },
     informationContainer: {
         justifyContent: 'center',
         alignItems: 'center',
         gap: 20,
-        marginTop: StatusBar.currentHeight
     },
     information: {
         justifyContent: 'center',
         alignItems: 'center',
     },
     weatherText: {
-        fontSize: 12,
-        fontWeight: '700',
+        fontSize: 20,
+        fontWeight: '600',
         color: '#DEDDDD'
     },
     tempText: {
