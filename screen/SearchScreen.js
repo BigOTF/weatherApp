@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TextInput, Pressable, Image, TouchableOpacity, 
 import { LinearGradient } from 'expo-linear-gradient'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
-const API_KEY = 'eccebeba529b4197b40153829250503';
+const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY
 
-export default function SearchScreen() {
+export default function SearchScreen({navigation}) {
 
     const [city, setCity] = useState('')
     const [suggestion, setSuggestion] = useState([])
@@ -41,79 +41,66 @@ export default function SearchScreen() {
             locations={[0, 0.58, 1]}
             style={styles.container}
         >
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
+    
+            <LinearGradient
+                colors={['#957DCD', '#523D7F']}
+                locations={[0, 1]} 
+                style={styles.searchContainer}
+            >
+                <Ionicons name='search' size={16} color='#fff' />
 
-                <LinearGradient
-                    colors={['#957DCD', '#523D7F']}
-                    locations={[0, 1]} 
-                    style={styles.searchContainer}
-                >
-                    <Ionicons name='search' size={16} color='#fff' />
-
-                    <TextInput style={styles.input}
-                        value={city}
-                        onChangeText={(text) => {
-                            setCity(text)
-                            fetchCitySuggestion(text)
-                        }}
-                        placeholder='Enter city name'
-                        placeholderTextColor='#a4a4a4'
-                    />
-                </LinearGradient>
-
-                <LinearGradient
-                    colors={['#957DCD', '#523D7F']}
-                    locations={[0, 1]} 
-                    style={styles.locationContainer}
-                >
-                    <Ionicons name='location-outline' size={20} color='#fff' />
-                </LinearGradient>
-
-            </View>
+                <TextInput style={styles.input}
+                    value={city}
+                    onChangeText={(text) => {
+                        setCity(text)
+                        fetchCitySuggestion(text)
+                    }}
+                    placeholder='Enter city name'
+                    placeholderTextColor='#a4a4a4'
+                />
+            </LinearGradient>
 
             {suggestion.length > 0 && (
                 <FlatList
                     data={suggestion}
                     renderItem={({ item }) => (
-                        <TouchableOpacity
+                        <Pressable
                             onPress={() => fetchWeather(item.name)}
                             style={{
-                            padding: 10,
+                            paddingHorizontal: 15,
+                            paddingVertical: 20,
                             borderBottomWidth: 1,
-                            borderBottomColor: "#ddd",
+                            borderBottomColor: "#a4a4a4",
+                            marginTop: 10
                             }}
                         >
                             <Text style={{color: '#fff', fontSize: 16}}>{item.name}, {item.country}</Text>
-                        </TouchableOpacity>
-                      /*   <View>
-                            <Text style={{color: '#fff'}}>{item.country}</Text>
-                        </View> */
+                        </Pressable>
                     )}
+                    ItemSeparatorComponent={<View style={{marginBottom: 10}}/>}
                 />
             )}
         
-
             {
                 weather &&
-                <View style={{marginTop: 50}}>
+                <Pressable style={{marginTop: 50}} onPress={() => navigation.navigate("SearchDetails", { weather: weather, city: weather.location.name })}>
                     
-                    <View style={{flexDirection: 'row',}}>
-                        <LinearGradient
-                            colors={['#957DCD', '#523D7F']}
-                            locations={[0, 1]}
-                            style={{borderRadius: 15, paddingHorizontal: 30, paddingVertical: 20, width: '100%'}} 
-                        >
+                    <LinearGradient
+                        colors={['#957DCD', '#523D7F']}
+                        locations={[0, 1]}
+                        style={{borderRadius: 15, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}} 
+                    >
+                        <View style={{paddingHorizontal: 20, gap: 5}}>
                             <Text style={{fontSize: 20, fontWeight: '600', color: '#fff'}}>{weather.location.name}</Text>
                             <Text style={{fontSize: 14, fontWeight: '500', color: '#a4a4a4'}}>{weather.current.condition.text}</Text>
-                        </LinearGradient>
-
-                        <View style={{position: 'absolute', right: -20, top: -45}}>
-                            <Image source={{ uri: `https:${weather.current.condition.icon}` }}style={{width: 145, height: 160}} resizeMode='contain' />
                         </View>
-                        
-                    </View>
 
-                </View>
+                        <View style={{}}>
+                            <Image source={{ uri: `https:${weather.current.condition.icon}` }}style={{width: 145, height: 114}} resizeMode='contain' />
+                        </View>
+                    </LinearGradient>
+
+                </Pressable>
             }      
 
             <View style={styles.footerView}>
@@ -137,6 +124,7 @@ export default function SearchScreen() {
                     <Ionicons name='notifications' size={24} color='#fff' />
                 </View>
             </View>
+
         </LinearGradient>
     )
 }
@@ -155,18 +143,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        width: '85%',
     },
     input: {
         color: '#fff',
-        width: '90%'
-    },
-    locationContainer: {
-        width: 38,
-        height: 38,
-        borderRadius: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
+        width: '90%',
     },
     footerView: {
         flexDirection: 'row',

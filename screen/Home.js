@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Image, Text, ScrollView, StatusBar, RefreshControl, Pressable } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, Image, Text, ScrollView, StatusBar, RefreshControl, Pressable, FlatList } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const API_KEY = 'eccebeba529b4197b40153829250503';
+const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY
 const CITY = "Akure";
-//const URL = `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${CITY}`;
 const URL = `http://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${CITY}&days=2`;
+const SEVENDAYSURL = `http://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${CITY}&days=7`;
 
 export default function Home({ navigation }) {
     const [weather, setWeather] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isRefresh, setIsRefresh] = useState(false)
+    const [sevenDays, setSevenDays] = useState(null)
+
+    const [dayToShow, setDayToShow] = useState(true)
 
     const specificHours = [10, 12, 14, 16, 18, 20, 22, 0];
     const selectedWeather = weather?.forecast?.forecastday?.[0]?.hour?.filter(hour => {
         const hourValue = new Date(hour.time).getHours();
         return specificHours.includes(hourValue);
     }) || []; 
+
+    const fetchSevenDaysUrl = async() => {
+        try {
+            const response = await fetch(SEVENDAYSURL)
+            const data = await response.json()
+            setSevenDays(data.forecast.forecastday)
+        } catch(err) {
+            console.error(err)
+        }
+    }
 
     const formatDateTime = (localtime) => {
         const date = new Date(localtime);
@@ -46,6 +59,7 @@ export default function Home({ navigation }) {
 
     useEffect(() => {
         fetchWeather()
+        fetchSevenDaysUrl()
     }, [])
 
     const handleRefresh = () => {
@@ -109,28 +123,66 @@ export default function Home({ navigation }) {
 
                     <View style={{marginTop: 30, gap: 15}}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>Today</Text>
-                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>7-Day Forecasts</Text>
+
+                            <Pressable onPress={() => setDayToShow(true)}>
+                                <Text style={{fontSize: 12, fontWeight: '600', color: dayToShow ? '#fff' : '#a4a4a4'}}>Today</Text>
+                            </Pressable>
+                            
+
+                            <Pressable onPress={() => setDayToShow(false)}>
+                                <Text style={{fontSize: 12, fontWeight: '600', color: dayToShow ? '#a4a4a4' : '#fff'}}>7-Day Forecasts</Text>
+                            </Pressable>
+                            
                         </View>
 
-                        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                            <View style={{flexDirection: 'row', gap: 10}}>
-                                {selectedWeather.map((hour, index) => (
-                                    <LinearGradient
-                                        colors={['#957DCD', '#523D7F']}
-                                        locations={[0, 1]}
-                                        key={index}
-                                        style={{borderRadius: 8, paddingHorizontal: 7, paddingVertical: 10, alignItems: 'center', gap: 3}}
-                                    >
-                                        <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{new Date(hour.time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</Text>
-                                        <Image source={{ uri: `https:${hour.condition.icon}` }} style={{ width: 37, height: 30 }} />
-                                        <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.temp_c +  '\u00B0'}</Text>
-                                    </LinearGradient>
-                                ))}
-                            </View>
-                        </ScrollView>
-                    </View>
+                        {
+                            dayToShow ?
+                            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                                <View style={{flexDirection: 'row', gap: 10}}>
+                                    {selectedWeather.map((hour, index) => (
+                                        <LinearGradient
+                                            colors={['#957DCD', '#523D7F']}
+                                            locations={[0, 1]}
+                                            key={index}
+                                            style={{borderRadius: 8, paddingHorizontal: 7, paddingVertical: 10, alignItems: 'center', gap: 3}}
+                                        >
+                                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{new Date(hour.time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</Text>
+                                            <Image source={{ uri: `https:${hour.condition.icon}` }} style={{ width: 37, height: 30 }} />
+                                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.condition.text}</Text>
+                                            <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{hour.temp_c +  '\u00B0'}</Text>
+                                        </LinearGradient>
+                                    ))}
+                                </View>
+                            </ScrollView> :
 
+                            <View>
+
+                                {sevenDays?.length > 0 && (
+                                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                                        <View style={{flexDirection: 'row', gap: 10}}>
+                                            {sevenDays.map((day, index) => (
+                                                <LinearGradient
+                                                    colors={['#957DCD', '#523D7F']}
+                                                    locations={[0, 1]}
+                                                    key={index}
+                                                    style={{borderRadius: 8, paddingHorizontal: 7, paddingVertical: 10, alignItems: 'center', gap: 3}}
+                                                >
+                                                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#DEDDDD" }}>
+                                                        {new Date(day.date).toLocaleDateString("en-US", { weekday: "long" })}
+                                                    </Text>
+                                                    <Image source={{ uri: `https:${day.day.condition.icon}` }} style={{ width: 30, height: 30 }} />
+                                                    <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{day.day.condition.text}</Text>
+                                                    <Text style={{fontSize: 12, fontWeight: '600', color: '#DEDDDD'}}>{day.day.avgtemp_c +  '\u00B0'}</Text>
+                                                </LinearGradient>
+                                            ))}
+                                        </View>
+                                    </ScrollView>
+                                )}
+
+                            </View>
+                        }
+
+                    </View>
                     
                 </ScrollView>
             }

@@ -1,14 +1,17 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { View, Text, StyleSheet } from "react-native";
 
 import Home from "./screen/Home";
 import SearchScreen from "./screen/SearchScreen";
+import SearchDetails from "./screen/SearchDetails";
 import Profile from "./screen/Profile";
 import Notifcation from "./screen/Notifcation";
 
 const Stack = createNativeStackNavigator()
+const Tab = createBottomTabNavigator()
 
 export default function App() {
   return (
@@ -46,6 +49,20 @@ export default function App() {
           }}
         />
 
+        <Stack.Screen
+          name="SearchDetails"
+          component={SearchDetails}
+          options={{
+            headerTitleStyle: {
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 600,
+            },
+            headerTitleAlign: 'center',
+            headerTitle: '7 Days'
+          }}
+        />
+      
       </Stack.Navigator>
     </NavigationContainer>
   );
